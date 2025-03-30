@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { category } from "../utils/data";
+import { category } from "../utils/data"; // Ensure category is correctly imported
 import HeaderImage from "../utils/Images/Header.png";
 import ProductCategoryCard from "../components/cards/ProductCategoryCard";
 import ProductsCard from "../components/cards/ProductsCard";
@@ -21,6 +21,7 @@ const Container = styled.div`
   }
   background: ${({ theme }) => theme.bg};
 `;
+
 const Section = styled.div`
   max-width: 1400px;
   padding: 32px 16px;
@@ -28,10 +29,12 @@ const Section = styled.div`
   flex-direction: column;
   gap: 28px;
 `;
+
 const Img = styled.img`
   width: 100%;
   max-width: 1200px;
 `;
+
 const Title = styled.div`
   font-size: 28px;
   font-weight: 500;
@@ -39,6 +42,7 @@ const Title = styled.div`
   justify-content: ${({ center }) => (center ? "center" : "space-between")};
   align-items: center;
 `;
+
 const CardWrapper = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -55,10 +59,14 @@ const Home = () => {
 
   const getProducts = async () => {
     setLoading(true);
-    await getAllProducts().then((res) => {
-      setProducts(res.data);
+    try {
+      const res = await getAllProducts();
+      setProducts(res.data || []); // Ensure res.data is valid
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
       setLoading(false);
-    });
+    }
   };
 
   useEffect(() => {
@@ -73,9 +81,13 @@ const Home = () => {
       <Section>
         <Title>Food Categories</Title>
         <CardWrapper>
-          {category.map((category) => (
-            <ProductCategoryCard category={category} />
-          ))}
+          {category?.length > 0 ? ( // Optional chaining for category and check for empty array
+            category.map((categoryItem) => (
+              <ProductCategoryCard key={categoryItem.id} category={categoryItem} />
+            ))
+          ) : (
+            <p>No categories available</p>
+          )}
         </CardWrapper>
       </Section>
 
@@ -85,9 +97,13 @@ const Home = () => {
           <CircularProgress />
         ) : (
           <CardWrapper>
-            {products.map((product) => (
-              <ProductsCard product={product} />
-            ))}
+            {products.length > 0 ? ( // Check if products array is not empty
+              products.map((product) => (
+                <ProductsCard key={product.id} product={product} />
+              ))
+            ) : (
+              <p>No products available</p>
+            )}
           </CardWrapper>
         )}
       </Section>
